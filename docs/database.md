@@ -1,0 +1,7 @@
+# Database
+
+Apply migrations in filename order using the Supabase CLI or SQL migration workflow. Migration 1 creates contributions, payment events, refunds, moderated messages, site settings, admin activity, contact messages, reports, and the protected `admin_users` role table. Migration 2 adds bilingual scheduled daily moments. Migration 3 removes direct public writes and report-RPC access so the server API can enforce validation and rate limits. Migration 4 adds unique, private message appreciation records and a safe public aggregate count. Migration 5 audits contact status changes. All exposed tables have RLS enabled. Public users can read only consented approved messages and scheduled published moments. Financial rows, visitor hashes, event logs, refunds, settings, reports, and activity are private.
+
+The `public_contribution_summary()` function returns only aggregate successful non-demo counts/amounts and latest verified time. It does not reveal transactions. No demo seed financial rows exist. `seed.sql` is for local development only.
+
+Provision the first admin only after creating their Supabase Auth user, using the SQL editor with the exact trusted user UUID: `insert into public.admin_users (user_id) values ('<auth-user-uuid>');`. Do not grant admin through user metadata. Keep service role credentials server-side. Payment status changes must eventually be made by a narrow server-side verifier transaction, never by a browser or ordinary admin CRUD form.

@@ -1,0 +1,4 @@
+"use client";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+export function AdminLogin({locale="en"}:{locale?:string}){const [error,setError]=useState("");const router=useRouter();async function submit(form:FormData){setError("");const response=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:form.get("email"),password:form.get("password")})});const data=await response.json();if(!response.ok){setError(data.error);return;}router.push(`/${locale}/admin`);}return <form className="contact-form" action={submit}><label>Email<input type="email" name="email" required autoComplete="username"/></label><label>Password<input type="password" name="password" required autoComplete="current-password"/></label><button className="button">Sign in</button>{error&&<p className="form-error" role="alert">{error}</p>}</form>;}

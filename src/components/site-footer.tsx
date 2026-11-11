@@ -1,0 +1,3 @@
+import Link from "next/link";
+import { getMessages, type Locale } from "@/lib/i18n";
+export function SiteFooter({ locale }: { locale: Locale }) { const t=getMessages(locale); return <footer className="site-footer"><div><Link className="wordmark" href={`/${locale}`}>{t.brand}</Link><p>{t.footer}</p></div><div className="footer-links"><Link href={`/${locale}/privacy`}>{t.privacyTitle}</Link><Link href={`/${locale}/terms`}>{t.termsTitle}</Link><Link href={`/${locale}/refund-policy`}>{t.refundTitle}</Link><Link href={`/${locale}/payment-disclosure`}>{t.disclosureTitle}</Link></div><span>© {new Date().getFullYear()} JustGive</span></footer>; }
