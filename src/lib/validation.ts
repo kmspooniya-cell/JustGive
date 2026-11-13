@@ -10,4 +10,4 @@ export const messageSchema = z.object({
   locale: z.enum(["en", "hi", "hi-Latn"]).default("en"),
   website: z.string().max(0).optional()
 });
-export const contactSchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().email().max(254), message: z.string().trim().min(10).max(2000), website: z.string().max(0).optional(), locale: z.enum(["en","hi"]).optional() });
+export const contactSchema = z.object({ name: z.string().trim().min(1).max(100), email: z.string().email().max(254), message: z.string().trim().min(10).max(2000), website: z.string().max(0).optional(), locale: z.enum(["en", "hi", "hi-Latn"]).optional() });

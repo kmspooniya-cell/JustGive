@@ -7,10 +7,15 @@
 alter table public.messages
   add column pass_it_on text check (pass_it_on is null or char_length(pass_it_on) between 1 and 140);
 
+-- The public view is security_invoker, so readers also need column-level access
+-- on the base table; row-level security still limits them to approved messages.
+grant select (pass_it_on) on public.messages to anon, authenticated;
+
 comment on column public.messages.pass_it_on is
   'Optional short prompt inviting the reader to pass kindness on. Not a purchase, reward, or fund allocation.';
 -- Expose the prompt on the public approved-message view.
 create or replace view public.approved_messages with (security_invoker = true) as
-  select id, body, locale, created_at, pass_it_on from public.messages where status = 'approved' and public_consent = true;
+  select id, body, locale, created_at, appreciation_count, pass_it_on
+  from public.messages where status = 'approved' and public_consent = true;
 revoke all on public.approved_messages from anon, authenticated;
-grant select (id, body, locale, created_at, pass_it_on) on public.approved_messages to anon, authenticated;
+grant select (id, body, locale, created_at, appreciation_count, pass_it_on) on public.approved_messages to anon, authenticated;

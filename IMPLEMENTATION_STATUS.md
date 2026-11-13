@@ -71,8 +71,8 @@ Last reviewed: 2026-11-11
 
 ### Caveats / follow-ups
 - `hi-Latn` uses Hinglish for primary emotional copy (hero, nav, form, CTA) via message keys. Some secondary inline headings still render Devanagari on `hi-Latn`; moving those to message keys is a polish follow-up.
-- Migrations 202611120004 (intent), 202611120005 (pass-it-on), 202611120006 (impact) are additive and not applied to a live Supabase project.
-- Intent recording requires `REACTION_HASH_SECRET` + server-only Supabase credentials; without them the pulse degrades gracefully to `configured:false`.
+- Migration version 202611120004 is referenced below but is absent from `supabase/migrations`; the current source has no intent-recording migration or API. The checked-in sequence continues with 202611120005 (pass-it-on) and 202611120006 (impact). These migrations are not documented as applied to a live Supabase project.
+- The earlier intent-recording note is stale: no intent-recording API or migration is present; the public visual count is based on verified contributions.
 
 ### Verification
 - `npm run lint`: passed. `npm run typecheck`: passed. `npm test`: 15 files / 50 tests passed. `npm run build`: passed.

@@ -2,6 +2,8 @@ const buckets = new Map<string, { count: number; resetAt: number }>();
 /** In-memory development fallback only; use a shared Redis-compatible service in production. */
 export async function allowRequest(key: string, limit = 5, windowMs = 60_000) {
   if (process.env.NODE_ENV === "production") {
+    // A shared unknown-IP bucket lets one request source exhaust everyone’s quota.
+    if (key.endsWith(":unknown")) return false;
     const url=process.env.RATE_LIMIT_REDIS_URL; const token=process.env.RATE_LIMIT_REDIS_TOKEN;
     if(!url||!token)return false;
     try {
