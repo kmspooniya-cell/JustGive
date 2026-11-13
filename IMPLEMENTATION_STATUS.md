@@ -56,3 +56,23 @@ Last reviewed: 2026-11-11
 4. Add configured CAPTCHA and contact notification services, then test production Redis rate limiting.
 5. Apply the migration to a disposable Supabase project, verify policies/functions/auth flows, provision admins through trusted SQL, and run deployment smoke checks.
 6. Obtain legal/tax review and provider approval; only then complete production configuration and deployment.
+
+## Feature expansion pass (2026-11-12)
+
+### Added
+- **Receipt card (#2):** `/[locale]/receipt` shows an amount-banded keepsake after a successful demo payment, with download-as-SVG, copy-link, and WhatsApp share. The receipt token is bound to the server-verified demo order and never exposed in production.
+- **Trust Center (#5):** `/transparency` rebuilt as a plain-language Trust Center — verified figures only, "where your rupee goes", "what we do not claim", and a dated change log. No invented data.
+- **Hinglish register (#6):** third locale `hi-Latn` generated from `messages/hi.json` via `scripts/build-hinglish.mjs` (curated overrides for key emotional copy + transliteration fallback). Language switch cycles EN → हिंदी → Hinglish.
+- **Pay-it-forward prompts (#3):** optional one-line prompt per wall message (`pass_it_on`), turning the wall into a loop. Shown on the wall page and home preview for approved messages.
+- **Owner impact ledger (#7):** admin-managed, publishable personal notes (`impact_entries`) shown on /about, explicitly not a charitable allocation or fund statement.
+- **Return rituals (#4):** local-only `ReturnRitual` on the homepage — today's mood, private visit count, and a one-year anniversary note. Nothing uploaded, no streaks.
+- **Hero pulse (#8/#9):** combines the aggregate intent count with a local-only "moods today" counter in the hero. Honest, private-by-design.
+- **WhatsApp share (#10):** receipt and wall flows include native `wa.me` share links.
+
+### Caveats / follow-ups
+- `hi-Latn` uses Hinglish for primary emotional copy (hero, nav, form, CTA) via message keys. Some secondary inline headings still render Devanagari on `hi-Latn`; moving those to message keys is a polish follow-up.
+- Migrations 202611120004 (intent), 202611120005 (pass-it-on), 202611120006 (impact) are additive and not applied to a live Supabase project.
+- Intent recording requires `REACTION_HASH_SECRET` + server-only Supabase credentials; without them the pulse degrades gracefully to `configured:false`.
+
+### Verification
+- `npm run lint`: passed. `npm run typecheck`: passed. `npm test`: 15 files / 50 tests passed. `npm run build`: passed.

@@ -1,9 +1,10 @@
 "use client";
+import type { Locale } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { Accessibility, Volume2, VolumeX } from "lucide-react";
+import { inlineCopy } from "@/lib/inline-copy";
 
-export function AccessibilityTools({ locale }: { locale: "en" | "hi" }) {
-  const hi = locale === "hi";
+export function AccessibilityTools({ locale }: { locale: Locale }) {
   const [largeText, setLargeText] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -37,13 +38,13 @@ export function AccessibilityTools({ locale }: { locale: "en" | "hi" }) {
     } catch { audio.current = null; nodes.current = []; }
   }
   return <div className="accessibility-tools">
-    <details className="accessibility-panel"><summary aria-label={hi ? "सुलभता विकल्प" : "Accessibility options"}><Accessibility size={19}/><span>{hi ? "सुलभता" : "Access"}</span></summary><div className="accessibility-options">
-      <label><input type="checkbox" checked={largeText} onChange={event => setLargeText(event.target.checked)}/>{hi ? "बड़ा पाठ" : "Larger text"}</label>
-      <label><input type="checkbox" checked={highContrast} onChange={event => setHighContrast(event.target.checked)}/>{hi ? "अधिक कंट्रास्ट" : "Higher contrast"}</label>
-      <label><input type="checkbox" checked={reducedMotion} onChange={event => setReducedMotion(event.target.checked)}/>{hi ? "कम गति" : "Reduce motion"}</label>
+    <details className="accessibility-panel"><summary aria-label={inlineCopy(locale, "सुलभता विकल्प", "Accessibility options")}><Accessibility size={19}/><span>{inlineCopy(locale, "सुलभता", "Access")}</span></summary><div className="accessibility-options">
+      <label><input type="checkbox" checked={largeText} onChange={event => setLargeText(event.target.checked)}/>{inlineCopy(locale, "बड़ा पाठ", "Larger text")}</label>
+      <label><input type="checkbox" checked={highContrast} onChange={event => setHighContrast(event.target.checked)}/>{inlineCopy(locale, "अधिक कंट्रास्ट", "Higher contrast")}</label>
+      <label><input type="checkbox" checked={reducedMotion} onChange={event => setReducedMotion(event.target.checked)}/>{inlineCopy(locale, "कम गति", "Reduce motion")}</label>
     </div></details>
-    <button className="ambient-audio-button" type="button" onClick={() => void toggleAudio()} aria-pressed={audioOn} aria-label={audioOn ? (hi ? "शांत पृष्ठभूमि ध्वनि बंद करें" : "Turn off gentle ambient sound") : (hi ? "शांत पृष्ठभूमि ध्वनि चालू करें" : "Turn on gentle ambient sound")}>
-      {audioOn ? <Volume2 size={18}/> : <VolumeX size={18}/>}<span>{audioOn ? (hi ? "ध्वनि चालू" : "Sound on") : (hi ? "शांत ध्वनि" : "Ambient sound")}</span>
+    <button className="ambient-audio-button" type="button" onClick={() => void toggleAudio()} aria-pressed={audioOn} aria-label={audioOn ? (inlineCopy(locale, "शांत पृष्ठभूमि ध्वनि बंद करें", "Turn off gentle ambient sound")) : (inlineCopy(locale, "शांत पृष्ठभूमि ध्वनि चालू करें", "Turn on gentle ambient sound"))}>
+      {audioOn ? <Volume2 size={18}/> : <VolumeX size={18}/>}<span>{audioOn ? (inlineCopy(locale, "ध्वनि चालू", "Sound on")) : (inlineCopy(locale, "शांत ध्वनि", "Ambient sound"))}</span>
     </button>
   </div>;
 }

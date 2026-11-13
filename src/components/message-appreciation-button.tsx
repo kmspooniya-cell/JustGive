@@ -20,5 +20,5 @@ export function MessageAppreciationButton({ id, count, locale }: { id: string; c
       setDone(true);
     } catch { setError(true); }
   }
-  return <span className="appreciation-control"><button className="button-secondary appreciation-button" type="button" disabled={done} onClick={appreciate} aria-label={`${done ? t.appreciated : t.appreciate}, ${appreciations}`}><Heart size={14} aria-hidden="true" />{done ? t.appreciated : t.appreciate}<span>{appreciations.toLocaleString(locale === "hi" ? "hi-IN" : "en-IN")}</span></button>{error && <span className="sr-only" role="status">{locale === "hi" ? "अभी सराहना दर्ज नहीं हो सकी।" : "Appreciation could not be saved yet."}</span>}</span>;
+  return <span className="appreciation-control"><button className="button-secondary appreciation-button" type="button" disabled={done} onClick={appreciate} aria-label={`${done ? t.appreciated : t.appreciate}, ${appreciations}`}><Heart size={14} aria-hidden="true" />{done ? t.appreciated : t.appreciate}<span>{appreciations.toLocaleString(locale !== "en" ? "hi-IN" : "en-IN")}</span></button>{error && <span className="sr-only" role="status">{locale !== "en" ? "अभी सराहना दर्ज नहीं हो सकी।" : "Appreciation could not be saved yet."}</span>}</span>;
 }

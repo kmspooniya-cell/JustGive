@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Check, Heart, Send, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, Heart, Send, Sparkles, BookOpen, Stethoscope, PawPrint, HandHeart, CircleOff, HeartHandshake, ChevronDown, X } from "lucide-react";
 import { getMessages, type Locale } from "@/lib/i18n";
 import { GlassButton, GlassInput, GlassPanel } from "@/components/glass-surfaces";
 
 const presets = [1, 5, 10, 21, 51, 101];
-const moods = ["happy", "calm", "grateful", "inspired", "generous"] as const;
+const causes = ["education", "healthcare", "animalWelfare", "other", "none"] as const;
+const causeIcons = { education: BookOpen, healthcare: Stethoscope, animalWelfare: PawPrint, other: HandHeart, none: CircleOff };
 
 export function ContributionForm({ locale }: { locale: Locale }) {
   const t = getMessages(locale);
@@ -20,20 +21,29 @@ export function ContributionForm({ locale }: { locale: Locale }) {
   const [noteConsent, setNoteConsent] = useState(false);
   const [noteBusy, setNoteBusy] = useState(false);
   const [noteState, setNoteState] = useState<"idle" | "sent" | "error">("idle");
-  const [mood, setMood] = useState<(typeof moods)[number] | null>(null);
+  const [cause, setCause] = useState<(typeof causes)[number] | null>(null);
+  const [causeOpen, setCauseOpen] = useState(false);
+  const causeDialog = useRef<HTMLDialogElement>(null);
+  const causeTrigger = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const selectedAmount = raw ? Number(raw) : amount;
+
+  useEffect(() => {
+    const dialog = causeDialog.current;
+    const trigger = causeTrigger.current;
+    if (!causeOpen || !dialog) return;
+    dialog.showModal();
+    dialog.querySelector<HTMLButtonElement>(".cause-dialog-close")?.focus();
+    return () => {
+      dialog.close();
+      trigger?.focus();
+    };
+  }, [causeOpen]);
 
   function changeAmount(value: number) {
     setAmount(value);
     setRaw("");
     setError("");
-    setVisualPulse((pulse) => pulse + 1);
-    window.dispatchEvent(new Event("justgive:amount-change"));
-  }
-
-  function changeMood(value: (typeof moods)[number]) {
-    setMood(value);
     setVisualPulse((pulse) => pulse + 1);
     window.dispatchEvent(new Event("justgive:amount-change"));
   }
@@ -48,9 +58,7 @@ export function ContributionForm({ locale }: { locale: Locale }) {
   async function submitContribution() {
     const value = raw ? Number(raw) : amount;
     if (value === null || !Number.isInteger(value) || value < 1 || value > 100000) {
-      setError(locale === "hi"
-        ? "राशि ₹1 से ₹1,00,000 के बीच पूर्ण संख्या होनी चाहिए।"
-        : "Enter a whole rupee amount between ₹1 and ₹1,00,000.");
+      setError(t.amountInvalid);
       return;
     }
 
@@ -61,7 +69,7 @@ export function ContributionForm({ locale }: { locale: Locale }) {
       const response = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amountPaise: value * 100, locale }),
+        body: JSON.stringify({ amountPaise: value * 100, locale, causePreference: cause }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? t.notConfigured);
@@ -99,8 +107,8 @@ export function ContributionForm({ locale }: { locale: Locale }) {
     <GlassPanel className="give-card" id="give" aria-labelledby="give-title">
       <div className="give-card-header">
         <div className="give-heading">
-          <h2 id="give-title">{locale === "hi" ? "आज आप कितना देना चाहेंगे?" : "How much feels right today?"}</h2>
-          <p>{locale === "hi" ? "आपकी पसंद, आपकी गति।" : "Your choice, your pace. No amount is expected."}</p>
+          <h2 id="give-title">{t.formHeading}</h2>
+          <p>{t.formIntro}</p>
         </div>
         <div key={visualPulse} className="contribution-visual" aria-hidden="true">
           <svg viewBox="0 0 88 88" role="presentation">
@@ -124,15 +132,8 @@ export function ContributionForm({ locale }: { locale: Locale }) {
       </div>
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
-        {locale === "hi" ? `चयनित राशि ${selectedAmount === null ? "नहीं चुनी गई" : `₹${selectedAmount}`}` : `Selected amount ${selectedAmount === null ? "not chosen" : `₹${selectedAmount}`}`}
+        {t.selectedAmount.replace("{amount}", selectedAmount === null ? t.amountNotSelected : `₹${selectedAmount}`)}
       </p>
-      <fieldset className="mood-selector">
-        <legend>{locale === "hi" ? "आज आपका मन कैसा है? (वैकल्पिक)" : "How are you feeling today? (optional)"}</legend>
-        <div className="mood-options">
-          {moods.map((value) => <button type="button" key={value} aria-pressed={mood === value} className={mood === value ? "mood-option selected" : "mood-option"} onClick={() => changeMood(value)}>{t.moods[value]}</button>)}
-        </div>
-        {mood && <p className="mood-message" role="status">{t.moodMessages[mood]}</p>}
-      </fieldset>
       <div className="amount-grid" role="group" aria-label={t.choose}>
         {presets.map((value) => (
           <button
@@ -169,16 +170,48 @@ export function ContributionForm({ locale }: { locale: Locale }) {
         </div>
       </label>
 
+      <div className="cause-trigger-row">
+        <button ref={causeTrigger} type="button" className="cause-trigger" aria-haspopup="dialog" aria-expanded={causeOpen} aria-describedby="cause-optional-label" onClick={() => setCauseOpen(true)}>
+          <HeartHandshake size={17} aria-hidden="true" />
+          <span>{cause ? t.causes[cause] : t.causeTrigger}</span>
+          <ChevronDown size={15} aria-hidden="true" />
+        </button>
+        <span id="cause-optional-label" className="cause-optional">{t.optionalLabel}</span>
+      </div>
+
+      {causeOpen && <dialog ref={causeDialog} className="cause-dialog" aria-labelledby="cause-dialog-title" onCancel={(event) => { event.preventDefault(); setCauseOpen(false); }} onClick={(event) => { if (event.target === event.currentTarget) setCauseOpen(false); }}>
+        <div className="cause-dialog-heading">
+          <div><h2 id="cause-dialog-title">{t.causeModalTitle}</h2><p>{t.causeSubtitle}</p></div>
+          <button type="button" className="cause-dialog-close" aria-label={t.causeClose} onClick={() => setCauseOpen(false)}><X size={19} aria-hidden="true" /></button>
+        </div>
+        <div className="cause-dialog-options" role="group" aria-label={t.causeModalTitle}>
+          {causes.map((value) => {
+            const Icon = causeIcons[value];
+            return <button type="button" key={value} aria-pressed={cause === value} className="cause-option" onClick={() => setCause(current => current === value ? null : value)}>
+              <Icon size={19} aria-hidden="true" /><span>{t.causes[value]}</span>{cause === value && <Check size={15} aria-hidden="true" />}
+            </button>;
+          })}
+        </div>
+        <div className="cause-dialog-actions">
+          {cause && <button type="button" className="button-secondary cause-clear" onClick={() => setCause(null)}>{t.causeClear}</button>}
+          <button type="button" className="button cause-done" onClick={() => setCauseOpen(false)}>{t.causeDone}</button>
+        </div>
+      </dialog>}
+
+      <p className="recipient-note">{t.recipient}</p>
+      <p className="recipient-note">{t.checkoutCauseDisclosure}</p>
+
       <GlassButton className="button give-submit" type="button" disabled={busy || selectedAmount === null} onClick={submitContribution}>
         {busy
-          ? (locale === "hi" ? "एक क्षण…" : "One moment…")
+          ? t.working
           : selectedAmount === null ? t.chooseAmount : t.continue.replace("{amount}", String(Number.isFinite(selectedAmount) ? selectedAmount : 0))}
         <ArrowUpRight size={18} aria-hidden="true" />
       </GlassButton>
       {error && <p id="amount-error" className="form-error" role="alert">{error}</p>}
-      <p className="recipient-note">{t.recipient}</p>
-      <p className="tiny-note">{t.voluntary}</p>
-      <p className="demo-note"><span className="demo-dot" aria-hidden="true" />{t.demo}</p>
+      <div className="demo-disclosures">
+        <p className="demo-note"><span className="demo-dot" aria-hidden="true" />{t.demo}</p>
+        <p className="tiny-note">{t.voluntary}</p>
+      </div>
 
       <details className="optional-note">
         <summary><Heart size={16} aria-hidden="true" />{t.leaveNote}</summary>

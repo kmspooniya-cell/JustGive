@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 
-export function AdminSettingsForm({ universe, tree }: { universe: boolean; tree: boolean }) {
-  const [values, setValues] = useState({ kindness_universe: universe, kindness_tree: tree });
-  const [savedValues, setSavedValues] = useState({ kindness_universe: universe, kindness_tree: tree });
+export function AdminSettingsForm({ universe }: { universe: boolean }) {
+  const [values, setValues] = useState({ kindness_universe: universe });
+  const [savedValues, setSavedValues] = useState({ kindness_universe: universe });
   const [status, setStatus] = useState("");
   async function save(key: keyof typeof values) {
     setStatus("");
@@ -18,7 +18,7 @@ export function AdminSettingsForm({ universe, tree }: { universe: boolean; tree:
     }
   }
   return <div className="admin-settings-form">
-    {([ ["kindness_universe", "Kindness Universe"], ["kindness_tree", "Digital Kindness Tree"] ] as const).map(([key, label]) => <form key={key} onSubmit={event => { event.preventDefault(); void save(key); }} className="admin-card">
+    {([ ["kindness_universe", "Kindness Universe"] ] as const).map(([key, label]) => <form key={key} onSubmit={event => { event.preventDefault(); void save(key); }} className="admin-card">
       <h2>{label}</h2><label className="admin-setting-toggle"><input type="checkbox" checked={values[key]} onChange={event => setValues(current => ({ ...current, [key]: event.target.checked }))}/> Display on the public homepage</label><button className="button" type="submit">Save setting</button>
     </form>)}
     <p role="status" aria-live="polite">{status}</p>

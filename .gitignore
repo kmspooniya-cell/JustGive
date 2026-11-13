@@ -7,3 +7,10 @@ coverage
 npm-debug.log*
 .vercel
 *.tsbuildinfo
+# Local AI agent skills - keep out of project Git history
+.agents/skills/
+.claude/skills/
+# Local tooling artifacts
+.playwright-cli/
+.taste-skill/
+supabase/.temp/

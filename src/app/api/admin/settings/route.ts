@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const schema = z.object({ key: z.enum(["kindness_universe", "kindness_tree"]), enabled: z.boolean() });
+const schema = z.object({ key: z.literal("kindness_universe"), enabled: z.boolean() });
 export async function POST(request: Request) {
   const input = schema.safeParse(await request.json().catch(() => null));
   if (!input.success) return NextResponse.json({ error: "Invalid setting." }, { status: 400 });
